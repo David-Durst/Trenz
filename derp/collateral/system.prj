@@ -1,0 +1,2 @@
+verilog work vsrc/*.v
+verilog work app/app.v
