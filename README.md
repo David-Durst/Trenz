@@ -25,21 +25,21 @@
 * In `Trenz/Mac`, update the makefile variables DERP_USER and DERP_PASS and TRENZ_PATH
 * Type `make`, you should get dropped into an interactive prompt, in `Trenz/Mac` you should see `system.bit` and `zynq` copied from `derp`
 * Try write `w 0 ffff` to change the screen color to tealish.
-    ```
-~/repos/Trenz/Mac master*
-❯ make
-STARTING STREAM
-Entering Interactive mode!
-Commands:
-        Pipe reg read:  r <regNum>
-        Pipe reg write: w <regNum> <value>
-        Cam reg read:   cr <camid> <addr>
-        Cam reg write:  cw <camid> <addr> <value>
-        Save to disk:   s
-        Help:           h
-        Stop cmd:       <Anything else>
->w 0 ffff
-WROTE 0xffff to pipe reg 0x00
->
-    ```
+  ```
+  ~/repos/Trenz/Mac master*
+  ❯ make
+  STARTING STREAM
+  Entering Interactive mode!
+  Commands:
+          Pipe reg read:  r <regNum>
+          Pipe reg write: w <regNum> <value>
+          Cam reg read:   cr <camid> <addr>
+          Cam reg write:  cw <camid> <addr> <value>
+          Save to disk:   s
+          Help:           h
+          Stop cmd:       <Anything else>
+  >w 0 ffff
+  WROTE 0xffff to pipe reg 0x00
+  >
+  ```
 
