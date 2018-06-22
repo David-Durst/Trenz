@@ -1,7 +1,9 @@
 # Setup instructions
 
-## On your laptop (MacOs)
-* Install `sshpass` - From https://gist.github.com/arunoda/7790979: `brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb`
+## On your laptop (MacOS)
+* Install `sshpass`
+  * One option from https://gist.github.com/arunoda/7790979:  
+    `brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb`
 * Go to Networks pane in MacOS settings
     * Add a new interface and manually configure (Apple USB Ethernet Adapter), name = Trenz
     * Configure manually, IP Address = 192.168.42.51, Subnet Mask = 255.255.255.0
