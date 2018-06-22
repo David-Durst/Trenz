@@ -5,7 +5,9 @@ ZYNQ_ADDR=192.168.42.50
 ZYNQ_WRITE_PATH=/tmp
 ZYNQ_PASS=1234
 
-DERP_PASS=fake
+DERP_USER="<REPLACE_WITH_YOUR_DERP_ACCOUNT>"
+DERP_PASS="<REPLACE_WITH_YOUR_DERP_PASSWORD>"
+TRENZ_PATH=~/Trenz  # Update if you didn't clone Trenz into your home directory
 
 all: zynq.run
 
@@ -14,11 +16,11 @@ clean:
 
 app.v:
 	python app.py
-	@sshpass -p $(DERP_PASS) scp app.v rdaly@derp.stanford.edu:~/mthon/app/.
+	@sshpass -p $(DERP_PASS) scp app.v $(DERP_USER)@derp.stanford.edu:$(TRENZ_PATH)/derp/app/.
 
 system.bit:
-	@sshpass -p $(DERP_PASS) scp rdaly@derp.stanford.edu:~/mthon/system.bit .
-	@sshpass -p $(DERP_PASS) scp rdaly@derp.stanford.edu:~/mthon/csrc/zynq .
+	@sshpass -p $(DERP_PASS) scp $(DERP_USER)@derp.stanford.edu:$(TRENZ_PATH)/derp/system.bit .
+	@sshpass -p $(DERP_PASS) scp $(DERP_USER)@derp.stanford.edu:$(TRENZ_PATH)/derp/csrc/zynq .
 
 zynq.run: system.bit
 	@sshpass -p $(ZYNQ_PASS) ssh root@$(ZYNQ_ADDR) "echo 'fclk0' > /sys/devices/amba.0/f8007000.ps7-dev-cfg/fclk_export" ||:
@@ -27,7 +29,7 @@ zynq.run: system.bit
 	@sshpass -p $(ZYNQ_PASS) ssh root@$(ZYNQ_ADDR) "echo '96000000' > /sys/class/fclk/fclk1/set_rate"
 	@sshpass -p $(ZYNQ_PASS) scp system.bit zynq root@$(ZYNQ_ADDR):$(ZYNQ_WRITE_PATH)/.
 	@sshpass -p $(ZYNQ_PASS) ssh root@$(ZYNQ_ADDR) "cat $(ZYNQ_WRITE_PATH)/system.bit > /dev/xdevcfg"
-	@sshpass -p $(ZYNQ_PASS) ssh root@$(ZYNQ_ADDR) "$(ZYNQ_WRITE_PATH)/zynq 0 0 0" 
+	@sshpass -p $(ZYNQ_PASS) ssh root@$(ZYNQ_ADDR) "$(ZYNQ_WRITE_PATH)/zynq 0 0 0"
 	@sshpass -p $(ZYNQ_PASS) ssh root@$(ZYNQ_ADDR) "echo 'fclk0' > /sys/devices/amba.0/f8007000.ps7-dev-cfg/fclk_unexport" ||:
 	@sshpass -p $(ZYNQ_PASS) ssh root@$(ZYNQ_ADDR) "echo 'fclk1' > /sys/devices/amba.0/f8007000.ps7-dev-cfg/fclk_unexport" ||:
 
