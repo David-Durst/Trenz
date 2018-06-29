@@ -18,6 +18,7 @@
 
 ## On derp
 * Clone this repository
+* Copy an existing `xilinx.lic` file into your home directory, e.g. with `cp /home/lenny/.Xilinx/xilinx.lic ~/.Xilinx/`
 * Add `. /opt/Xilinx/14.7/ISE_DS/settings64.sh` to your `.profile` and source it
 * In `Trenz/derp`, try `make`
 
