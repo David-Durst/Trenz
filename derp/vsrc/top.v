@@ -158,7 +158,7 @@ module top
     wire dramr2app_valid;
     wire dramr2app_ready;
 
-    DramReader preapp_reader(
+    DramReaderBuf preapp_reader(
         .fclk(FCLK0),
         .rst_n(rst_n),
         
@@ -182,7 +182,6 @@ module top
 
         .debug_astate(),
 
-        .dout_burst_ready(dramr2display_burst_ready),
         .dout_ready(dramr2app_ready),
         .dout_valid(dramr2app_valid),
         .dout(dramr2app_data[63:0])
@@ -204,7 +203,7 @@ module top
         .dout_ready(app2dramw_ready)
     );
 
-    DramWriterBuf app_writer2(
+    DramWriterBuf app_writer(
         .fclk(FCLK0),
         .rst_n(rst_n),
         

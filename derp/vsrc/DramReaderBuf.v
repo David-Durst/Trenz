@@ -56,7 +56,7 @@ module DramReaderBuf(
     wire frame_done;
     assign frame_done = (M2S_AXI_ARADDR + 128)==(BUF_ADDR+FRAME_BYTES);
 
-    localparam A_IDLE = 0, A_FRAME_IDLE = 1, A_FRAME_WAIT=2;
+    localparam A_IDLE = 2'h0, A_FRAME_IDLE = 2'h1, A_FRAME_WAIT=2'h2;
     //ADDR logic
     reg [1:0] a_state;
     //wire [1:0] debug_astate;
