@@ -184,23 +184,23 @@
 #NET "debug[3]" IOSTANDARD = LVCMOS33 | LOC="W11"; #       J2_B12  B13_L3_P    W11   
 
 
-NET "VGA_VS_n" IOSTANDARD = LVCMOS33 | LOC="V7"; #       J2_A9    B13_L23_P   
-NET "VGA_HS_n" IOSTANDARD = LVCMOS33 | LOC="Y10"; #      J2_A10   B13_L10_N   
-NET "VGA_blue[4]" IOSTANDARD = LVCMOS33 | LOC="Y11"; #      J2_A11   B13_L10_P   
-NET "VGA_blue[3]" IOSTANDARD = LVCMOS33 | LOC="W12"; #      J2_A12   B13_L4_N    
-NET "VGA_blue[2]" IOSTANDARD = LVCMOS33 | LOC="V12"; #      J2_A13   B13_L4_P    
-NET "VGA_blue[1]" IOSTANDARD = LVCMOS33 | LOC="AA6"; #      J2_A14   B13_L14_N   
-NET "VGA_blue[0]" IOSTANDARD = LVCMOS33 | LOC="AA7"; #      J2_A15   B13_L14_P   
-NET "VGA_green[4]" IOSTANDARD = LVCMOS33 | LOC="V9"; #       J2_A16   B13_L1_N    
-NET "VGA_green[3]" IOSTANDARD = LVCMOS33 | LOC="V10"; #      J2_A17   B13_L1_P    
-NET "VGA_green[2]" IOSTANDARD = LVCMOS33 | LOC="U11"; #      J2_A18   B13_L5_N    
-NET "VGA_green[1]" IOSTANDARD = LVCMOS33 | LOC="U12"; #      J2_A19   B13_L5_P    
-NET "VGA_green[0]" IOSTANDARD = LVCMOS33 | LOC="W18"; #      J2_A20   B33_L13_N   
-NET "VGA_red[4]" IOSTANDARD = LVCMOS33 | LOC="W17"; #      J2_A21   B33_L13_P   
-NET "VGA_red[3]" IOSTANDARD = LVCMOS33 | LOC="AA19"; #     J2_A22   B33_L11_N   
-NET "VGA_red[2]" IOSTANDARD = LVCMOS33 | LOC="Y19"; #      J2_A23   B33_L11_P   
-NET "VGA_red[1]" IOSTANDARD = LVCMOS33 | LOC="AB22"; #     J2_A24   B33_L7_N    
-NET "VGA_red[0]" IOSTANDARD = LVCMOS33 | LOC="AA22"; #     J2_A25   B33_L7_P    
+#NET "VGA_VS_n" IOSTANDARD = LVCMOS33 | LOC="V7"; #       J2_A9    B13_L23_P   
+#NET "VGA_HS_n" IOSTANDARD = LVCMOS33 | LOC="Y10"; #      J2_A10   B13_L10_N   
+#NET "VGA_blue[4]" IOSTANDARD = LVCMOS33 | LOC="Y11"; #      J2_A11   B13_L10_P   
+#NET "VGA_blue[3]" IOSTANDARD = LVCMOS33 | LOC="W12"; #      J2_A12   B13_L4_N    
+#NET "VGA_blue[2]" IOSTANDARD = LVCMOS33 | LOC="V12"; #      J2_A13   B13_L4_P    
+#NET "VGA_blue[1]" IOSTANDARD = LVCMOS33 | LOC="AA6"; #      J2_A14   B13_L14_N   
+#NET "VGA_blue[0]" IOSTANDARD = LVCMOS33 | LOC="AA7"; #      J2_A15   B13_L14_P   
+#NET "VGA_green[4]" IOSTANDARD = LVCMOS33 | LOC="V9"; #       J2_A16   B13_L1_N    
+#NET "VGA_green[3]" IOSTANDARD = LVCMOS33 | LOC="V10"; #      J2_A17   B13_L1_P    
+#NET "VGA_green[2]" IOSTANDARD = LVCMOS33 | LOC="U11"; #      J2_A18   B13_L5_N    
+#NET "VGA_green[1]" IOSTANDARD = LVCMOS33 | LOC="U12"; #      J2_A19   B13_L5_P    
+#NET "VGA_green[0]" IOSTANDARD = LVCMOS33 | LOC="W18"; #      J2_A20   B33_L13_N   
+#NET "VGA_red[4]" IOSTANDARD = LVCMOS33 | LOC="W17"; #      J2_A21   B33_L13_P   
+#NET "VGA_red[3]" IOSTANDARD = LVCMOS33 | LOC="AA19"; #     J2_A22   B33_L11_N   
+#NET "VGA_red[2]" IOSTANDARD = LVCMOS33 | LOC="Y19"; #      J2_A23   B33_L11_P   
+#NET "VGA_red[1]" IOSTANDARD = LVCMOS33 | LOC="AB22"; #     J2_A24   B33_L7_N    
+#NET "VGA_red[0]" IOSTANDARD = LVCMOS33 | LOC="AA22"; #     J2_A25   B33_L7_P    
 
 
 #############################################################
