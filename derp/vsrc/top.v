@@ -22,13 +22,6 @@ module top
     inout [3:0] DDR_DQS_n,
     inout DDR_VRN,
     inout DDR_VRP,
-
-    output VGA_VS_n,
-    output VGA_HS_n,
-    output [4:0] VGA_red,
-    output [4:0] VGA_green,
-    output [4:0] VGA_blue
-
   );
     
     `include "ps7_include.vh";
@@ -37,36 +30,14 @@ module top
 
     wire FCLK0;
     BUFG bufg0(.I(FCLKCLK[0]),.O(FCLK0));
-    wire FCLK1;
-    BUFG bufg1(.I(FCLKCLK[1]),.O(FCLK1));
     
     wire rst_n;
     assign ARESETN = FCLKRESETN[0];
     assign rst_n = ARESETN;
- 
-    wire CLK_25M;
-    wire CLK_24M;
-    wire CLK_48M;
-   
-      
-    ClkCtrl clks(
-        .CLKIN_100M(FCLK0),
-        .CLKIN_96M(FCLK1),
-        .CLK_25M(CLK_25M),
-        .CLK_24M(CLK_24M),
-        .CLK_48M(CLK_48M),
-        .rst_n(rst_n)
-    );
-    
 
-    wire XCLK_DIV;
-    
-  
     // debug counters
     
-    wire [31:0] cam_debug[3:0];
     
-    wire [7:0] display_debug;
     
     wire [31:0] MMIO_CMD;
     wire [31:0] MMIO_CAM0_CMD;
@@ -77,20 +48,6 @@ module top
     wire [31:0] MMIO_TRIBUF_ADDR1;
     wire [31:0] MMIO_FRAME_BYTES2;
     wire [31:0] MMIO_TRIBUF_ADDR2;
-
-    wire rw_cam0_cmd_valid;
-    wire [17:0] rw_cam0_resp;
-    wire rw_cam0_resp_valid;
-    
-    wire rw_cam1_cmd_valid;
-    wire [17:0] rw_cam1_resp;
-    wire rw_cam1_resp_valid;
-    
-
-    wire [31:0] pipe_in_cnt;
-    wire [31:0] pipe_out_cnt;
-    wire [31:0] pipe_in_tot;
-    wire [31:0] pipe_out_tot;
 
     wire [31:0] debug[15:0];
 
@@ -133,8 +90,8 @@ module top
         .MMIO_TRIBUF_ADDR0(MMIO_TRIBUF_ADDR0[31:0]),
         .MMIO_FRAME_BYTES1(MMIO_FRAME_BYTES1[31:0]),
         .MMIO_TRIBUF_ADDR1(MMIO_TRIBUF_ADDR1[31:0]),
-        .MMIO_FRAME_BYTES2(MMIO_FRAME_BYTES2[31:0]),
-        .MMIO_TRIBUF_ADDR2(MMIO_TRIBUF_ADDR2[31:0]),
+        .MMIO_FRAME_BYTES2(),
+        .MMIO_TRIBUF_ADDR2(),
         .MMIO_PIPE0(MMIO_PIPE0[31:0]),
         .MMIO_PIPE1(MMIO_PIPE1[31:0]),
         .MMIO_PIPE2(MMIO_PIPE2[31:0]),
@@ -156,13 +113,13 @@ module top
         .debug14(debug[14]), 
         .debug15(debug[15]), 
         
-        .rw_cam0_cmd_valid(rw_cam0_cmd_valid), 
-        .rw_cam0_resp(rw_cam0_resp[17:0]),// {err,rw,addr,data}
-        .rw_cam0_resp_valid(rw_cam0_resp_valid),
+        .rw_cam0_cmd_valid(), 
+        .rw_cam0_resp('h0),// {err,rw,addr,data}
+        .rw_cam0_resp_valid(1'h0),
         
-        .rw_cam1_cmd_valid(rw_cam1_cmd_valid), 
-        .rw_cam1_resp(rw_cam1_resp[17:0]),// {err,rw,addr,data}
-        .rw_cam1_resp_valid(rw_cam1_resp_valid),
+        .rw_cam1_cmd_valid(), 
+        .rw_cam1_resp('h0),// {err,rw,addr,data}
+        .rw_cam1_resp_valid(1'h0),
         
         .MMIO_IRQ()
     );
@@ -173,74 +130,80 @@ module top
     assign startall = (MMIO_CMD == `CMD_START);
     assign stopall = (MMIO_CMD == `CMD_STOP);
 
+    wire load_addr;
+    wire rd_frame_ready;
+    wire wr_frame_ready;
 
-    
-    // Writer
-    wire wr_sync2; 
-    wire wr_frame_valid2;
-    wire wr_frame_ready2;
-    wire [31:0] wr_FRAME_BYTES2;
-    wire [31:0] wr_BUF_ADDR2;
-    wire wr_frame_done2;
-     
-    //Read interface 
-    wire rd_sync2; // allows you to sync frame reads
-    wire rd_frame_valid2;
-    wire rd_frame_ready2;
-    wire [31:0] rd_FRAME_BYTES2;
-    wire [31:0] rd_BUF_ADDR2;
-    wire rd_frame_done2;
+    //Small FSM to load the addresses
+    localparam IDLE=2'h0, AXI_WAIT=2'b1, LOAD_ADDR=2'h2
+    reg [1:0] CS;
+    reg [1:0] NS;
+    always @(*) begin
+      case(CS):
+        IDLE: begin
+          NS = startall ? AXI_WAIT : IDLE;
+        end
+        AXI_WAIT: begin
+          NS = rd_frame_ready & wr_frame_ready ? LOAD_ADDR : AXI_WAIT;
+        end
+        LOAD_ADDR: begin
+          NS = IDLE;
+        end
+    end
+    `REG(FCLK0, CS, IDLE, NS)
+    assign load_addr = CS==LOAD_ADDR;
 
-    assign wr_sync2 = 1'b1;
-    assign rd_sync2 = 1'b1;
+    wire [63:0] dramr2app_data;
+    wire dramr2app_valid;
+    wire dramr2app_ready;
 
-    tribuf_ctrl tribuf_ctrl2(
-
+    DramReader preapp_reader(
         .fclk(FCLK0),
         .rst_n(rst_n),
-
-        //MMIO interface
-        .start(startall),
-        .stop(stopall),
-        .FRAME_BYTES(MMIO_FRAME_BYTES2[31:0]),
-        .TRIBUF_ADDR(MMIO_TRIBUF_ADDR2[31:0]),
-
-        //Write interface (final renderer)
         
-        .wr_sync(wr_sync2),
-        .wr_frame_valid(wr_frame_valid2),
-        .wr_frame_ready(wr_frame_ready2),
-        .wr_FRAME_BYTES(wr_FRAME_BYTES2[31:0]),
-        .wr_BUF_ADDR(wr_BUF_ADDR2[31:0]),
-        .wr_frame_done(wr_frame_done2),
-        //Read interface pipe
-        .rd_sync(rd_sync2),
-        .rd_frame_valid(rd_frame_valid2),
-        .rd_frame_ready(rd_frame_ready2),
-        .rd_FRAME_BYTES(rd_FRAME_BYTES2[31:0]),
-        .rd_BUF_ADDR(rd_BUF_ADDR2[31:0]),
-        .rd_frame_done(rd_frame_done2),
+        .M2S_AXI_ACLK(), // clock is already driven
+        .M2S_AXI_ARADDR(M2S_HP2_AXI_ARADDR),
+        .M2S_AXI_ARREADY(M2S_HP2_AXI_ARREADY),
+        .M2S_AXI_ARVALID(M2S_HP2_AXI_ARVALID),
+        .M2S_AXI_RDATA(M2S_HP2_AXI_RDATA),
+        .M2S_AXI_RREADY(M2S_HP2_AXI_RREADY),
+        .M2S_AXI_RRESP(M2S_HP2_AXI_RRESP),
+        .M2S_AXI_RVALID(M2S_HP2_AXI_RVALID),
+        .M2S_AXI_RLAST(M2S_HP2_AXI_RLAST),
+        .M2S_AXI_ARLEN(M2S_HP2_AXI_ARLEN),
+        .M2S_AXI_ARSIZE(M2S_HP2_AXI_ARSIZE),
+        .M2S_AXI_ARBURST(M2S_HP2_AXI_ARBURST),
+        
+        .rd_frame_valid(load_addr),
+        .rd_frame_ready(rd_frame_ready),
+        .rd_FRAME_BYTES(MMIO_FRAME_BYTES0[31:0]),
+        .rd_BUF_ADDR(MMIO_TRIBUF_ADDR0[31:0]),
 
-        .debug_wr_ptr(),
-        .debug_wr_cs(),
-        .debug_rd_cs(),
-        .debug_rd_ptr()
+        .debug_astate(),
+
+        .dout_burst_ready(dramr2display_burst_ready),
+        .dout_ready(dramr2app_ready),
+        .dout_valid(dramr2app_valid),
+        .dout(dramr2app_data[63:0])
     );
-    
-    wire [63:0] pipe2dramw_data;
-    wire pipe2dramw_valid;
-    wire pipe2dramw_ready;
+
+    wire [63:0] app2dramw_data;
+    wire app2dramw_valid;
+    wire app2dramw_ready;
+
 
     app myapp(
         .clk(FCLK0),
         .rst_n(rst_n),
-        .data(pipe2dramw_data),
-        .valid(pipe2dramw_valid),
-        .ready(pipe2dramw_ready),
-        .tap(MMIO_PIPE0)
+        .din(dramr2app[63:0]),
+        .din_valid(dramr2app_valid),
+        .din_ready(dramr2app_ready),
+        .dout(app2dramw_data[63:0]),
+        .dout_valid(app2dramw_valid),
+        .dout_ready(app2dramw_ready),
     );
 
-    DramWriterBuf pipe_writer2(
+    DramWriterBuf app_writer2(
         .fclk(FCLK0),
         .rst_n(rst_n),
         
@@ -262,98 +225,17 @@ module top
         .M2S_AXI_AWSIZE(M2S_HP2_AXI_AWSIZE),
         .M2S_AXI_AWBURST(M2S_HP2_AXI_AWBURST),
         
-        .wr_frame_valid(wr_frame_valid2),
-        .wr_frame_ready(wr_frame_ready2),
-        .wr_FRAME_BYTES(wr_FRAME_BYTES2[31:0]),
-        .wr_BUF_ADDR(wr_BUF_ADDR2[31:0]),
+        .wr_frame_valid(load_addr),
+        .wr_frame_ready(wr_frame_ready),
+        .wr_FRAME_BYTES(MMIO_FRAME_BYTES1[31:0]),
+        .wr_BUF_ADDR(MMIO_TRIBUF_ADDR1[31:0]),
     
         .debug_astate(),
 
-        .din_valid(pipe2dramw_valid),
-        .din_ready(pipe2dramw_ready),
-        .din(pipe2dramw_data[63:0])
+        .din_valid(app2dramw_valid),
+        .din_ready(app2dramw_ready),
+        .din(app2dramw_data[63:0])
     );
-
-
-    //-----------------------------------------------------------------------------
-    
-
-
-
-    wire [31:0] cur_vga_addr;
-    wire [7:0] VGA_red_full;
-    wire [7:0] VGA_green_full;
-    wire [7:0] VGA_blue_full;
-
-    wire [31:0] vga_cmd;
-    wire vga_cmd_valid;
-    assign vga_cmd = startall ? `CMD_START : stopall ? `CMD_STOP : 32'h0;
-    assign vga_cmd_valid = startall | stopall;
-    
-    wire dramr2display_burst_ready;
-    wire dramr2display_valid;
-    wire dramr2display_ready;
-    wire [63:0] dramr2display_data;
-    
-    DramReader vga_reader2(
-        .fclk(FCLK0),
-        .rst_n(rst_n),
-        
-        .M2S_AXI_ACLK(), // clock is already driven
-        .M2S_AXI_ARADDR(M2S_HP2_AXI_ARADDR),
-        .M2S_AXI_ARREADY(M2S_HP2_AXI_ARREADY),
-        .M2S_AXI_ARVALID(M2S_HP2_AXI_ARVALID),
-        .M2S_AXI_RDATA(M2S_HP2_AXI_RDATA),
-        .M2S_AXI_RREADY(M2S_HP2_AXI_RREADY),
-        .M2S_AXI_RRESP(M2S_HP2_AXI_RRESP),
-        .M2S_AXI_RVALID(M2S_HP2_AXI_RVALID),
-        .M2S_AXI_RLAST(M2S_HP2_AXI_RLAST),
-        .M2S_AXI_ARLEN(M2S_HP2_AXI_ARLEN),
-        .M2S_AXI_ARSIZE(M2S_HP2_AXI_ARSIZE),
-        .M2S_AXI_ARBURST(M2S_HP2_AXI_ARBURST),
-        
-        .rd_frame_valid(rd_frame_valid2),
-        .rd_frame_ready(rd_frame_ready2),
-        .rd_FRAME_BYTES(rd_FRAME_BYTES2[31:0]),
-        .rd_BUF_ADDR(rd_BUF_ADDR2[31:0]),
-
-        .debug_astate(),
-
-        .dout_burst_ready(dramr2display_burst_ready),
-        .dout_ready(dramr2display_ready),
-        .dout_valid(dramr2display_valid),
-        .dout(dramr2display_data[63:0])
-    );
-
-    wire pvalid;
-
-    display vga_display(
-        .fclk(FCLK0),
-        .rst_n(rst_n),
-        .vgaclk(CLK_25M),
-        
-        .vga_cmd(vga_cmd),
-        .vga_cmd_valid(vga_cmd_valid),
-        .vga_cmd_ready(),
-
-        .VGA_VS_n(VGA_VS_n),
-        .VGA_HS_n(VGA_HS_n),
-        .VGA_red(VGA_red_full[7:0]),
-        .VGA_green(VGA_green_full[7:0]),
-        .VGA_blue(VGA_blue_full[7:0]),
-        .pvalid(pvalid),
-        .sdata_burst_ready(dramr2display_burst_ready),
-        .sdata_valid(dramr2display_valid),
-        .sdata_ready(dramr2display_ready),
-        .sdata(dramr2display_data[63:0]),
-
-        .debug(display_debug[7:0])
-    );
-    
-    assign VGA_red[4:0] = pvalid ? VGA_red_full[7:3] : 0;
-    assign VGA_green[4:0] = pvalid ? VGA_green_full[7:3] : 0;
-    assign VGA_blue[4:0] = pvalid ? VGA_blue_full[7:3] : 0;
-
 
 endmodule : top
 
