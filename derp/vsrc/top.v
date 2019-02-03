@@ -21,7 +21,7 @@ module top
     inout [3:0] DDR_DQS,
     inout [3:0] DDR_DQS_n,
     inout DDR_VRN,
-    inout DDR_VRP,
+    inout DDR_VRP
   );
     
     `include "ps7_include.vh";
@@ -135,11 +135,11 @@ module top
     wire wr_frame_ready;
 
     //Small FSM to load the addresses
-    localparam IDLE=2'h0, AXI_WAIT=2'b1, LOAD_ADDR=2'h2
+    localparam IDLE=2'h0, AXI_WAIT=2'b1, LOAD_ADDR=2'h2;
     reg [1:0] CS;
     reg [1:0] NS;
     always @(*) begin
-      case(CS):
+      case(CS)
         IDLE: begin
           NS = startall ? AXI_WAIT : IDLE;
         end
@@ -149,6 +149,7 @@ module top
         LOAD_ADDR: begin
           NS = IDLE;
         end
+      endcase
     end
     `REG(FCLK0, CS, IDLE, NS)
     assign load_addr = CS==LOAD_ADDR;
@@ -192,15 +193,15 @@ module top
     wire app2dramw_ready;
 
 
-    app myapp(
+    app #(.BITS(3)) myapp(
         .clk(FCLK0),
         .rst_n(rst_n),
-        .din(dramr2app[63:0]),
+        .din(dramr2app_data[63:0]),
         .din_valid(dramr2app_valid),
         .din_ready(dramr2app_ready),
         .dout(app2dramw_data[63:0]),
         .dout_valid(app2dramw_valid),
-        .dout_ready(app2dramw_ready),
+        .dout_ready(app2dramw_ready)
     );
 
     DramWriterBuf app_writer2(

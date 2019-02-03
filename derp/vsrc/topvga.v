@@ -1,5 +1,5 @@
 `include "macros.vh"
-module top
+module topvga
   (
     inout [53:0] MIO,
     inout PS_SRSTB,
@@ -355,5 +355,5 @@ module top
     assign VGA_blue[4:0] = pvalid ? VGA_blue_full[7:3] : 0;
 
 
-endmodule : top
+endmodule : topvga
 
