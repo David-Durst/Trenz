@@ -192,7 +192,7 @@ module top
     wire app2dramw_ready;
 
 
-    app #(.BITS(3)) myapp(
+    app myapp(
         .clk(FCLK0),
         .rst_n(rst_n),
         .din(dramr2app_data[63:0]),

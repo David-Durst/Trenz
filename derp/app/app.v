@@ -35,9 +35,19 @@ module app #(parameter BITS=3) (
 
 
   //Here is the app.
-  assign pixel_in_ready = pixel_out_ready;
-  assign pixel_out_valid = pixel_in_valid;
-  assign pixel_out = pixel_in+1'b1; //Dummy program to just add 1 to each pixel
+  //assign pixel_in_ready = pixel_out_ready;
+  //assign pixel_out_valid = pixel_in_valid;
+  //assign pixel_out = pixel_in+1'b1; //Dummy program to just add 1 to each pixel
+  sequentialSimpleAdd_Circuit adderCirc(
+    .CE(1'b1),
+    .CLK(clk),
+    .I0(pixel_in),
+    .O0(pixel_out),
+    .ready_data_in(pixel_in_ready),
+    .ready_data_out(pixel_out_ready),
+    .valid_data_in(pixel_in_valid),
+    .valid_data_out(pixel_out_valid)
+  );
 
   
   deserializer #(.INLOGBITS(BITS), .OUTLOGBITS(6)) deserinst(
