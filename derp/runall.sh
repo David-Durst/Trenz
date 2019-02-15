@@ -121,6 +121,20 @@ echo "Circuit | Module                                 | Partition | Slices*    
 echo "Circuit |        Clock Net    |   Resource   |Locked|Fanout|Net Skew(ns)|Max Delay(ns)|" > results/timing_temp.txt
 
 for circuitName in sequentialSimpleAdd partialParallelSimpleAdd parallelSimpleAdd sequentialConvolution partialParallel2Convolution partialParallel4Convolution partialParallel8Convolution downsampleStencilChain1Per64 downsampleStencilChain1Per32; do
+	if [ 1 -eq 0 ]; then
+		echo "verilog work vsrc/*.v" > system.prj
+		echo "verilog work app/${circuitName}.v" >> system.prj
+		echo "verilog work app/${circuitName}App.v" >> system.prj
+		echo "verilog work vsrc/*.v" > collateral/system.prj
+		echo "verilog work app/${circuitName}.v" >> collateral/system.prj
+		echo "verilog work app/${circuitName}App.v" >> collateral/system.prj
+		make clean
+		make
+		mkdir -p results/${circuitName}/
+		cp OUT_* results/${circuitName}/
+		cp system_map.mrp results/${circuitName}/
+	fi
+
 	echo "Processing ${circuitName}"
 	printf "${circuitName}" >> results/resources_temp.txt
 	grep ++adderCirc results/${circuitName}/system_map.mrp >> results/resources_temp.txt
