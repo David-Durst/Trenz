@@ -1,2 +1,3 @@
 verilog work vsrc/*.v
-verilog work app/app.v
+verilog work app/downsampleStencilChain1Per32.v
+verilog work app/downsampleStencilChain1Per32App.v
