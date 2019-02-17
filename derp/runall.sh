@@ -9,7 +9,7 @@ echo "Circuit | Module                                 | Partition | Slices*    
 
 echo "Circuit |        Clock Net    |   Resource   |Locked|Fanout|Net Skew(ns)|Max Delay(ns)|" > results/timing_temp.txt
 
-for circuitName in sequentialSimpleAdd partialParallelSimpleAdd parallelSimpleAdd sequentialConvolution partialParallel2Convolution partialParallel4Convolution partialParallel8Convolution downsampleStencilChain1Per64 downsampleStencilChain1Per32; do
+for circuitName in sequentialSimpleAdd partialParallelSimpleAdd parallelSimpleAdd sequentialConvolution partialParallel2Convolution partialParallel4Convolution partialParallel8Convolution downsampleStencilChain1Per64 downsampleStencilChain1Per32 convolution_32x32Im_2x2Win_1px_in_per_clk convolution_32x32Im_2x2Win_2px_in_per_clk convolution_32x32Im_2x2Win_4px_in_per_clk convolution_32x32Im_2x2Win_8px_in_per_clk downsample_256x256_to_32x32_1px_in_per_clk downsample_256x256_to_32x32_2px_in_per_clk downsample_256x256_to_32x32_4px_in_per_clk downsample_256x256_to_32x32_8px_in_per_clk downsample_256x256_to_32x32_16px_in_per_clk downsample_256x256_to_32x32_32px_in_per_clk downsample_256x256_to_32x32_64px_in_per_clk; do
 	echo "verilog work vsrc/*.v" > system.prj
 	echo "verilog work app/${circuitName}.v" >> system.prj
 	echo "verilog work app/${circuitName}App.v" >> system.prj
