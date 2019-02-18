@@ -1,3 +1,4 @@
+mkdir -p results
 rm results/resources_temp.txt
 rm results/timing_temp.txt
 rm results/overall_results_temp.csv
